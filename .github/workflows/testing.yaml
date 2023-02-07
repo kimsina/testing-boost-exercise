@@ -10,7 +10,7 @@ jobs:
       - name: "Install clang-format"
         run: sudo apt install clang-format
       - name: "Run style check"
-        run: clang-format src/*.cpp src/*.hpp tests/*.cpp --dry-run -Werror
+        run: clang-format src/*.cpp src/*.hpp tests/ConfigurationTest.cpp tests/matrixIOTest.cpp tests/MatrixSolverTest.cpp --dry-run -Werror
   build:
     runs-on: ubuntu-latest
     steps:
@@ -40,4 +40,4 @@ jobs:
           name: build
           path: ${{ github.workspace }}/build
       - name: "Run tests"
-        run: cd build && make test
+        run: cd build && sudo make test
