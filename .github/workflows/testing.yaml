@@ -23,11 +23,13 @@ jobs:
         run: cd build && cmake ..
       - name: "Execute make -j"
         run: cd build && make -j
+      - name: "Compress build directory"
+        run: tar -cvf build.tar build
       - name: "Upload build directory as artifact"
         uses: actions/upload-artifact@v3
         with:
           name: build
-          path: ${{ github.workspace }}/build
+          path: ${{ github.workspace }}/build.tar
           retention-days: 1
   test:
     needs: build
@@ -38,6 +40,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: build
-          path: ${{ github.workspace }}/build
+      - name: "Extract build directory"
+        run: tar -xvf build.tar
       - name: "Run tests"
-        run: cd build && sudo make test
+        run: cd build && make test
