@@ -1,0 +1,48 @@
+name: SSE CI/CD
+
+on: push
+
+jobs:
+  style:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install clang-format"
+        run: sudo apt install clang-format
+      - name: "Run style check"
+        run: clang-format src/*.cpp src/*.hpp tests/ConfigurationTest.cpp tests/matrixIOTest.cpp tests/MatrixSolverTest.cpp --dry-run -Werror
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Install dependencies"
+        run: sudo apt install -y cmake libeigen3-dev libboost-all-dev && sudo apt-get -qq -y install libyaml-cpp-dev
+      - name: "Create and change into build directory"
+        run: mkdir build && cd build
+      - name: "Execute cmake"
+        run: cd build && cmake ..
+      - name: "Execute make -j"
+        run: cd build && make -j
+      - name: "Compress build directory"
+        run: tar -cvf build.tar build
+      - name: "Upload build directory as artifact"
+        uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: ${{ github.workspace }}/build.tar
+          retention-days: 1
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Download build directory artifact"
+        uses: actions/download-artifact@v2
+        with:
+          name: build
+      - name: "Extract build directory"
+        run: tar -xvf build.tar
+      - name: "Install dependencies"
+        run: sudo apt install -y cmake libeigen3-dev libboost-all-dev && sudo apt-get -qq -y install libyaml-cpp-dev
+      - name: "Run tests"
+        run: cd build && make test
