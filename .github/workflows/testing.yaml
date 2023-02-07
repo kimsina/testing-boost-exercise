@@ -42,5 +42,7 @@ jobs:
           name: build
       - name: "Extract build directory"
         run: tar -xvf build.tar
+      - name: "Install dependencies"
+        run: sudo apt install -y cmake libeigen3-dev libboost-all-dev && sudo apt-get -qq -y install libyaml-cpp-dev
       - name: "Run tests"
         run: cd build && make test
